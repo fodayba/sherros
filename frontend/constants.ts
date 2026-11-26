@@ -1,4 +1,4 @@
-import { Product } from './types';
+import { Product, LookbookItem, Review } from './types';
 
 export const INITIAL_PRODUCTS: Product[] = [
   {
@@ -352,6 +352,79 @@ export const INITIAL_PRODUCTS: Product[] = [
     modelInfo: 'Model is 5\'8" / 173cm wearing size S'
   }
 ];
+
+export const INITIAL_LOOKBOOK: LookbookItem[] = [
+  {
+    id: 'lb-1',
+    creatorHandle: '@london_drip',
+    creatorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80',
+    caption: 'Clean proportions: heavyweight hoodie layered under tailored blazer with the chunky lug boots. Unmatched silhouette ⚡',
+    likes: 348,
+    featuredProductIds: ['fs-01', 'fs-03', 'fs-09'],
+    tags: ['#LondonStreetwear', '#4SherrosFit', '#WinterLayers']
+  },
+  {
+    id: 'lb-2',
+    creatorHandle: '@kofi_streets',
+    creatorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=900&q=80',
+    caption: 'Parachute trousers with raw selvedge tones and the techwear sling. Everyday high-street mobility.',
+    likes: 512,
+    featuredProductIds: ['fs-02', 'fs-10', 'fs-06'],
+    tags: ['#Techwear', '#ParachutePants', '#FitCheck']
+  },
+  {
+    id: 'lb-3',
+    creatorHandle: '@maya.vibe',
+    creatorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80',
+    caption: 'Distressed biker leather paired with the snake chain choker. Instant cult classic aesthetic 🔥',
+    likes: 429,
+    featuredProductIds: ['fs-05', 'fs-08', 'fs-04'],
+    tags: ['#BikerLuxe', '#90sGrunge', '#SherrosDrop']
+  }
+];
+
+export const INITIAL_REVIEWS: Record<string, Review[]> = {
+  'fs-01': [
+    {
+      id: 'rev-1',
+      productId: 'fs-01',
+      userName: 'Liam B.',
+      rating: 5,
+      date: '2 days ago',
+      title: 'Heaviest, best quality hoodie I own',
+      comment: 'The 480GSM fabric is unmatched. Super boxy drape, huge hood that actually covers properly. Went one size down for a cleaner street fit.',
+      verified: true,
+      fitVote: 'Runs large'
+    },
+    {
+      id: 'rev-2',
+      productId: 'fs-01',
+      userName: 'Chloe M.',
+      rating: 5,
+      date: '1 week ago',
+      title: 'Amazing acid wash finish',
+      comment: 'Color looks even better in person than the studio shots. Wears beautifully with cargo bottoms.',
+      verified: true,
+      fitVote: 'True to size'
+    }
+  ],
+  'fs-02': [
+    {
+      id: 'rev-3',
+      productId: 'fs-02',
+      userName: 'Sam K.',
+      rating: 5,
+      date: '3 days ago',
+      title: 'Balloon fit is perfect',
+      comment: 'Ankle bungee toggles let you switch between wide stack or cinched tapered cuffs. Insane value.',
+      verified: true,
+      fitVote: 'True to size'
+    }
+  ]
+};
 
 export const CATEGORIES = [
   { id: 'all', label: 'All Items' },
