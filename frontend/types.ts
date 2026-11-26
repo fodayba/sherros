@@ -21,7 +21,7 @@ export interface Product {
 }
 
 export interface CartItem {
-  id: string; // unique cart item id (e.g. productId-size-color)
+  id: string;
   productId: string;
   product: Product;
   size: string;
@@ -50,11 +50,23 @@ export interface FilterState {
 
 export interface Review {
   id: string;
+  productId: string;
   userName: string;
   rating: number;
   date: string;
   title: string;
   comment: string;
   verified: boolean;
-  fitVote: 'Too small' | 'True to size' | 'Too large';
+  fitVote: 'Runs small' | 'True to size' | 'Runs large';
+}
+
+export interface LookbookItem {
+  id: string;
+  creatorHandle: string;
+  creatorAvatar: string;
+  imageUrl: string;
+  caption: string;
+  likes: number;
+  featuredProductIds: string[];
+  tags: string[];
 }
