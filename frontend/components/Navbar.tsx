@@ -3,14 +3,13 @@ import {
   Search, 
   ShoppingBag, 
   Heart, 
-  User, 
-  Menu, 
-  X, 
+  Layers, 
   Sparkles, 
-  ChevronDown, 
   Percent, 
-  HelpCircle,
-  Truck
+  Truck,
+  Camera,
+  X,
+  Menu
 } from 'lucide-react';
 import { PROMO_BANNERS } from '../constants';
 
@@ -22,6 +21,8 @@ interface NavbarProps {
   onOpenCart: () => void;
   onOpenWishlist: () => void;
   onOpenStylist: () => void;
+  onScrollToOutfitBuilder: () => void;
+  onScrollToLookbook: () => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onResetView: () => void;
@@ -35,6 +36,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCart,
   onOpenWishlist,
   onOpenStylist,
+  onScrollToOutfitBuilder,
+  onScrollToLookbook,
   searchQuery,
   onSearchChange,
   onResetView
@@ -62,14 +65,29 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
         <div className="flex items-center space-x-5 ml-auto">
           <button 
+            onClick={onScrollToOutfitBuilder}
+            className="flex items-center font-bold text-gray-300 hover:text-white cursor-pointer"
+          >
+            <Layers className="w-3 h-3 mr-1 text-[#d4ff00]" />
+            FIT BUILDER
+          </button>
+          <span className="text-gray-500">|</span>
+          <button 
+            onClick={onScrollToLookbook}
+            className="flex items-center font-bold text-gray-300 hover:text-white cursor-pointer"
+          >
+            <Camera className="w-3 h-3 mr-1 text-[#2f68ee]" />
+            LOOKBOOK
+          </button>
+          <span className="text-gray-500">|</span>
+          <button 
             onClick={onOpenStylist} 
             className="flex items-center font-bold text-[#d4ff00] hover:underline cursor-pointer"
           >
             <Sparkles className="w-3 h-3 mr-1 animate-pulse" />
-            AI STYLIST CHAT
+            AI STYLIST
           </button>
           <span className="text-gray-500">|</span>
-          <span className="text-gray-300 hover:text-white cursor-pointer hidden sm:inline">Help & FAQs</span>
           <span className="text-gray-300 hover:text-white cursor-pointer font-bold">USD $</span>
         </div>
       </div>
@@ -175,8 +193,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* User actions: Stylist, Wishlist, Bag */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* User actions: Outfit Builder, Wishlist, Bag */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Quick Fit Studio button */}
+            <button
+              onClick={onScrollToOutfitBuilder}
+              className="hidden xl:flex items-center space-x-1.5 bg-gray-100 hover:bg-black hover:text-white text-gray-900 px-3 py-2 rounded-full text-xs font-bold tracking-wide transition shadow-sm"
+              title="Create Outfit"
+            >
+              <Layers className="w-3.5 h-3.5 text-black group-hover:text-white" />
+              <span>FIT CANVAS</span>
+            </button>
+
             {/* AI Stylist shortcut */}
             <button
               onClick={onOpenStylist}
@@ -251,6 +279,30 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             ))}
           </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => {
+                onScrollToOutfitBuilder();
+                setMobileMenuOpen(false);
+              }}
+              className="py-2.5 bg-gray-100 text-black font-black text-xs uppercase rounded-lg flex items-center justify-center gap-1.5"
+            >
+              <Layers className="w-4 h-4" />
+              Fit Studio
+            </button>
+            <button
+              onClick={() => {
+                onScrollToLookbook();
+                setMobileMenuOpen(false);
+              }}
+              className="py-2.5 bg-gray-100 text-black font-black text-xs uppercase rounded-lg flex items-center justify-center gap-1.5"
+            >
+              <Camera className="w-4 h-4" />
+              Lookbook
+            </button>
+          </div>
+
           <button
             onClick={() => {
               onOpenStylist();
