@@ -1,0 +1,12 @@
+{
+  "webAppConfig": {
+    "projectId": "four-sherros",
+    "appId": "1:669289252038:web:06b5938cd0a9e3681b83c7",
+    "apiKey": "AIzaSyDNp76CNx5upfMehKZJChYvn6KgGHPGOUw",
+    "authDomain": "four-sherros.firebaseapp.com",
+    "storageBucket": "four-sherros.firebasestorage.app",
+    "messagingSenderId": "669289252038",
+    "measurementId": "G-RVXM9X5G64"
+  },
+  "databaseId": "four-sherros-58027f0a"
+}
