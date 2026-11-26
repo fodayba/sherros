@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   collection, 
   doc, 
@@ -8,8 +8,8 @@ import {
   writeBatch 
 } from 'firebase/firestore';
 import { db, initAuthSession } from './services/firebase';
-import { Product, CartItem, FilterState } from './types';
-import { INITIAL_PRODUCTS } from './constants';
+import { Product, CartItem, FilterState, Review, LookbookItem } from './types';
+import { INITIAL_PRODUCTS, INITIAL_LOOKBOOK, INITIAL_REVIEWS } from './constants';
 import { Navbar } from './components/Navbar';
 import { FilterBar } from './components/FilterBar';
 import { ProductCard } from './components/ProductCard';
@@ -18,7 +18,9 @@ import { CartDrawer } from './components/CartDrawer';
 import { WishlistDrawer } from './components/WishlistDrawer';
 import { StylistModal } from './components/StylistModal';
 import { CheckoutModal } from './components/CheckoutModal';
-import { Sparkles, ArrowRight, ShieldCheck, RotateCcw, Truck, Instagram, Twitter, Youtube } from 'lucide-react';
+import { OutfitBuilder } from './components/OutfitBuilder';
+import { LookbookGallery } from './components/LookbookGallery';
+import { Sparkles, ArrowRight, ShieldCheck, RotateCcw, Truck, Instagram, Twitter, Youtube, Layers, Camera } from 'lucide-react';
 
 export default function App() {
   // State
@@ -26,6 +28,8 @@ export default function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlistIds, setWishlistIds] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [lookbooks, setLookbooks] = useState<LookbookItem[]>(INITIAL_LOOKBOOK);
+  const [reviews, setReviews] = useState<Record<string, Review[]>>(INITIAL_REVIEWS);
   
   // Drawer & modal visibility
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -33,6 +37,10 @@ export default function App() {
   const [isStylistOpen, setIsStylistOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [stylistContextProduct, setStylistContextProduct] = useState<Product | undefined>(undefined);
+
+  // Section references for smooth scrolling
+  const outfitBuilderRef = useRef<HTMLDivElement>(null);
+  const lookbookRef = useRef<HTMLDivElement>(null);
 
   // Filters
   const [filters, setFilters] = useState<FilterState>({
@@ -46,7 +54,7 @@ export default function App() {
     onlyNew: false
   });
 
-  // Initialize Firebase and seed products if needed
+  // Initialize Firebase and seed products/lookbook if needed
   useEffect(() => {
     let unsubscribeCart: () => void = () => {};
     let unsubscribeWishlist: () => void = () => {};
@@ -58,7 +66,6 @@ export default function App() {
         const prodSnap = await getDocs(prodColRef);
         
         if (prodSnap.empty) {
-          // Seed the initial catalog into Firestore
           const batch = writeBatch(db);
           INITIAL_PRODUCTS.forEach((p) => {
             const ref = doc(db, 'products', p.id);
@@ -129,7 +136,6 @@ export default function App() {
       addedAt: Date.now()
     };
 
-    // Update local immediately for snappy UX
     setCart((prev) => {
       const idx = prev.findIndex((i) => i.id === cartItemId);
       if (idx >= 0) {
@@ -140,7 +146,6 @@ export default function App() {
       return [...prev, newItem];
     });
 
-    // Sync to Firestore
     try {
       const user = await initAuthSession();
       await setDoc(doc(db, 'users', user.uid, 'cart', cartItemId), newItem);
@@ -207,6 +212,29 @@ export default function App() {
     }
   };
 
+  // Review operations
+  const handleAddReview = (productId: string, newReview: Omit<Review, 'id' | 'productId' | 'date' | 'verified'>) => {
+    const created: Review = {
+      id: `rev-${Date.now()}`,
+      productId,
+      date: 'Just now',
+      verified: true,
+      ...newReview
+    };
+
+    setReviews(prev => ({
+      ...prev,
+      [productId]: [created, ...(prev[productId] || [])]
+    }));
+  };
+
+  // Lookbook likes
+  const handleLikeLook = (lookId: string) => {
+    setLookbooks(prev => 
+      prev.map(l => l.id === lookId ? { ...l, likes: l.likes + 1 } : l)
+    );
+  };
+
   const wishlistProducts = useMemo(() => {
     return products.filter((p) => wishlistIds.includes(p.id));
   }, [products, wishlistIds]);
@@ -214,19 +242,14 @@ export default function App() {
   // Filtered and sorted products
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      // Gender filter
       if (filters.gender !== 'all') {
         if (p.gender !== filters.gender && p.gender !== 'unisex') return false;
       }
-      // Category filter
       if (filters.category !== 'all') {
         if (p.category !== filters.category) return false;
       }
-      // Sale filter
       if (filters.onlySale && !p.isSale) return false;
-      // New filter
       if (filters.onlyNew && !p.isNew) return false;
-      // Search query
       if (filters.searchQuery.trim()) {
         const q = filters.searchQuery.toLowerCase();
         const matchesName = p.name.toLowerCase().includes(q);
@@ -240,7 +263,7 @@ export default function App() {
       if (filters.sort === 'price-desc') return b.price - a.price;
       if (filters.sort === 'rating') return b.rating - a.rating;
       if (filters.sort === 'newest') return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
-      return 0; // recommended
+      return 0;
     });
   }, [products, filters]);
 
@@ -258,6 +281,8 @@ export default function App() {
           setStylistContextProduct(undefined);
           setIsStylistOpen(true);
         }}
+        onScrollToOutfitBuilder={() => outfitBuilderRef.current?.scrollIntoView({ behavior: 'smooth' })}
+        onScrollToLookbook={() => lookbookRef.current?.scrollIntoView({ behavior: 'smooth' })}
         searchQuery={filters.searchQuery}
         onSearchChange={(q) => setFilters((prev) => ({ ...prev, searchQuery: q }))}
         onResetView={() => setFilters({
@@ -299,6 +324,13 @@ export default function App() {
               >
                 <span>Shop Streetwear</span>
                 <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => outfitBuilderRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-[#2f68ee] hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-6 py-3.5 rounded-xl uppercase tracking-wider transition flex items-center gap-2 shadow-lg"
+              >
+                <Layers className="w-4 h-4" />
+                <span>Outfit Builder</span>
               </button>
               <button
                 onClick={() => {
@@ -363,6 +395,29 @@ export default function App() {
             ))}
           </div>
         )}
+
+        {/* Feature 1: Interactive Outfit Canvas / Fit Builder */}
+        <div ref={outfitBuilderRef} className="pt-8">
+          <OutfitBuilder
+            products={products}
+            onSelectProduct={setSelectedProduct}
+            onAddToCart={handleAddToCart}
+            onOpenStylistForOutfit={(names) => {
+              setStylistContextProduct(undefined);
+              setIsStylistOpen(true);
+            }}
+          />
+        </div>
+
+        {/* Feature 2: Community Lookbook & As Seen On You */}
+        <div ref={lookbookRef} className="pt-4">
+          <LookbookGallery
+            lookbooks={lookbooks}
+            allProducts={products}
+            onSelectProduct={setSelectedProduct}
+            onLikeLook={handleLikeLook}
+          />
+        </div>
       </main>
 
       {/* High-Street Value Props Banner */}
@@ -419,8 +474,8 @@ export default function App() {
             <div>
               <h5 className="font-black uppercase tracking-wider text-white mb-4">MORE FROM 4S</h5>
               <ul className="space-y-2 text-gray-400">
-                <li className="hover:text-white cursor-pointer">Mobile App</li>
-                <li className="hover:text-white cursor-pointer">Gift Vouchers</li>
+                <li className="hover:text-white cursor-pointer">Outfit Canvas Studio</li>
+                <li className="hover:text-white cursor-pointer">Community Lookbook</li>
                 <li className="hover:text-white cursor-pointer">4 SHERROS Premier</li>
                 <li className="hover:text-white cursor-pointer">Black Friday Deals</li>
               </ul>
@@ -459,6 +514,8 @@ export default function App() {
           setStylistContextProduct(prod);
           setIsStylistOpen(true);
         }}
+        productReviews={selectedProduct ? (reviews[selectedProduct.id] || []) : []}
+        onAddReview={handleAddReview}
       />
 
       <CartDrawer
@@ -498,7 +555,6 @@ export default function App() {
         items={cart}
         onOrderComplete={() => {
           setCart([]);
-          // Clear user cart in firestore
           initAuthSession().then(async (user) => {
             try {
               const { deleteDoc } = await import('firebase/firestore');
